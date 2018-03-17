@@ -155,81 +155,85 @@ while True:
 	startTime = time.perf_counter()
 	log.debug("Starting run")
 
-	allSubs = {}
-	largerSubs = set()
-	smallerSubs = set()
-	for subreddit in getAllSubreddits():
-		if (((LIMIT * 0.95) < subreddit['subscribers'] < (LIMIT * 1.05)) and (datetime.utcnow() > subreddit['checkedDate'] + timedelta(hours=4))) \
-				or (datetime.utcnow() > subreddit['checkedDate'] + timedelta(hours=24)):
-			actualSubscribers = getSubredditSubscribers(subreddit['subreddit'])
-			log.debug("/r/{} from {} to {}".format(subreddit['subreddit'], subreddit['subscribers'], actualSubscribers))
-			updateSubreddit(subreddit['subreddit'], actualSubscribers)
-			subreddit['subscribers'] = actualSubscribers
+	try:
+		allSubs = {}
+		largerSubs = set()
+		smallerSubs = set()
+		for subreddit in getAllSubreddits():
+			if (((LIMIT * 0.95) < subreddit['subscribers'] < (LIMIT * 1.05)) and (datetime.utcnow() > subreddit['checkedDate'] + timedelta(hours=4))) \
+					or (datetime.utcnow() > subreddit['checkedDate'] + timedelta(hours=24)):
+				actualSubscribers = getSubredditSubscribers(subreddit['subreddit'])
+				log.debug("/r/{} from {} to {}".format(subreddit['subreddit'], subreddit['subscribers'], actualSubscribers))
+				updateSubreddit(subreddit['subreddit'], actualSubscribers)
+				subreddit['subscribers'] = actualSubscribers
 
-		addSubToSets(subreddit['subreddit'], subreddit['subscribers'], allSubs, largerSubs, smallerSubs)
+			addSubToSets(subreddit['subreddit'], subreddit['subscribers'], allSubs, largerSubs, smallerSubs)
 
-	for submission in r.subreddit('all').hot(limit=1000):
-		subredditName = submission.subreddit.display_name.lower()
-		if subredditName not in allSubs:
-			subscribers = getSubredditSubscribers(subredditName)
-			log.debug("Adding /r/{} with {}".format(subredditName, subscribers))
-			addSubreddit(subredditName, subscribers)
-			addSubToSets(subredditName, subscribers, allSubs, largerSubs, smallerSubs)
+		for submission in r.subreddit('all').hot(limit=1000):
+			subredditName = submission.subreddit.display_name.lower()
+			if subredditName not in allSubs:
+				subscribers = getSubredditSubscribers(subredditName)
+				log.debug("Adding /r/{} with {}".format(subredditName, subscribers))
+				addSubreddit(subredditName, subscribers)
+				addSubToSets(subredditName, subscribers, allSubs, largerSubs, smallerSubs)
 
-	listWiki = r.subreddit(SUBREDDIT).wiki['listofsubreddits']
-	subsInList = re.findall('(?:/r/)([\w-]+)', listWiki.content_md)
-	removeSubs = set()
-	listSubs = set()
-	for sub in subsInList:
-		subredditName = sub.lower()
-		listSubs.add(subredditName)
-		if subredditName not in allSubs:
-			subscribers = getSubredditSubscribers(subredditName)
-			log.debug("Adding /r/{} with {}".format(subredditName, subscribers))
-			addSubreddit(subredditName, subscribers)
-			addSubToSets(subredditName, subscribers, allSubs, largerSubs, smallerSubs)
+		listWiki = r.subreddit(SUBREDDIT).wiki['listofsubreddits']
+		subsInList = re.findall('(?:/r/)([\w-]+)', listWiki.content_md)
+		removeSubs = set()
+		listSubs = set()
+		for sub in subsInList:
+			subredditName = sub.lower()
+			listSubs.add(subredditName)
+			if subredditName not in allSubs:
+				subscribers = getSubredditSubscribers(subredditName)
+				log.debug("Adding /r/{} with {}".format(subredditName, subscribers))
+				addSubreddit(subredditName, subscribers)
+				addSubToSets(subredditName, subscribers, allSubs, largerSubs, smallerSubs)
 
-		if subredditName in smallerSubs:
-			removeSubs.add(subredditName)
+			if subredditName in smallerSubs:
+				removeSubs.add(subredditName)
 
-	addSubs = set()
-	for sub in largerSubs:
-		if sub not in listSubs:
-			addSubs.add(sub)
+		addSubs = set()
+		for sub in largerSubs:
+			if sub not in listSubs:
+				addSubs.add(sub)
 
-	bldr = []
-	bldr.append("Updated: ")
-	bldr.append(datetime.utcnow().strftime("%m/%d/%y %I:%M %p UTC"))
-	bldr.append("\n\n")
+		bldr = []
+		bldr.append("Updated: ")
+		bldr.append(datetime.utcnow().strftime("%m/%d/%y %I:%M %p UTC"))
+		bldr.append("\n\n")
 
-	bldr.append("Add subreddits: ")
-	bldr.append(str(len(addSubs)))
-	bldr.append("  \n\n")
-	for sub in sorted(addSubs, key=allSubs.get)[::-1]:
-		bldr.append("* /r/")
-		bldr.append(sub)
-		bldr.append(" : ")
-		bldr.append(str(allSubs[sub]))
+		bldr.append("Add subreddits: ")
+		bldr.append(str(len(addSubs)))
+		bldr.append("  \n\n")
+		for sub in sorted(addSubs, key=allSubs.get)[::-1]:
+			bldr.append("* /r/")
+			bldr.append(sub)
+			bldr.append(" : ")
+			bldr.append(str(allSubs[sub]))
+			bldr.append("\n")
+
 		bldr.append("\n")
+		bldr.append("Remove subreddits: ")
+		bldr.append(str(len(removeSubs)))
+		bldr.append("  \n\n")
+		for sub in sorted(removeSubs, key=allSubs.get)[::-1]:
+			bldr.append("* /r/")
+			bldr.append(sub)
+			bldr.append(" : ")
+			bldr.append(str(allSubs[sub]))
+			bldr.append("\n")
 
-	bldr.append("\n")
-	bldr.append("Remove subreddits: ")
-	bldr.append(str(len(removeSubs)))
-	bldr.append("  \n\n")
-	for sub in sorted(removeSubs, key=allSubs.get)[::-1]:
-		bldr.append("* /r/")
-		bldr.append(sub)
-		bldr.append(" : ")
-		bldr.append(str(allSubs[sub]))
-		bldr.append("\n")
+		log.debug("{} over / {} under | {} add / {} remove".format(len(largerSubs), len(smallerSubs), len(addSubs), len(removeSubs)))
 
-	log.debug("{} over / {} under | {} add / {} remove".format(len(largerSubs), len(smallerSubs), len(addSubs), len(removeSubs)))
-
-	if debug:
-		log.debug(''.join(bldr))
-	else:
-		addRemoveWiki = r.subreddit(SUBREDDIT).wiki['addremovesubreddits']
-		addRemoveWiki.edit(''.join(bldr))
+		if debug:
+			log.debug(''.join(bldr))
+		else:
+			addRemoveWiki = r.subreddit(SUBREDDIT).wiki['addremovesubreddits']
+			addRemoveWiki.edit(''.join(bldr))
+	except Exception as err:
+		log.warning("Error in loop")
+		log.warning(traceback.format_exc())
 
 	log.debug("Run complete after: %d", int(time.perf_counter() - startTime))
 	if once:
