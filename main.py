@@ -177,7 +177,7 @@ while True:
 				addSubreddit(subredditName, subscribers)
 				addSubToSets(subredditName, subscribers, allSubs, largerSubs, smallerSubs)
 
-		listWiki = r.subreddit(SUBREDDIT).wiki['listofsubreddits']
+		listWiki = r.subreddit(SUBREDDIT).wiki['alphabetized']
 		subsInList = re.findall('(?:/r/)([\w-]+)', listWiki.content_md)
 		removeSubs = set()
 		listSubs = set()
