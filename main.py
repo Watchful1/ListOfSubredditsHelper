@@ -203,10 +203,10 @@ while True:
 		bldr.append(datetime.utcnow().strftime("%m/%d/%y %I:%M %p UTC"))
 		bldr.append("\n\n")
 
-		bldr.append("Add subreddits: ")
-		bldr.append(str(len(addSubs)))
+		bldr.append("Remove subreddits: ")
+		bldr.append(str(len(removeSubs)))
 		bldr.append("  \n\n")
-		for sub in sorted(addSubs, key=allSubs.get)[::-1]:
+		for sub in sorted(removeSubs, key=allSubs.get)[::-1]:
 			bldr.append("* /r/")
 			bldr.append(sub)
 			bldr.append(" : ")
@@ -214,10 +214,10 @@ while True:
 			bldr.append("\n")
 
 		bldr.append("\n")
-		bldr.append("Remove subreddits: ")
-		bldr.append(str(len(removeSubs)))
+		bldr.append("Add subreddits: ")
+		bldr.append(str(len(addSubs)))
 		bldr.append("  \n\n")
-		for sub in sorted(removeSubs, key=allSubs.get)[::-1]:
+		for sub in sorted(addSubs, key=allSubs.get)[::-1]:
 			bldr.append("* /r/")
 			bldr.append(sub)
 			bldr.append(" : ")
