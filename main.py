@@ -17,7 +17,7 @@ from datetime import timedelta
 LOG_FOLDER_NAME = "logs"
 SUBREDDIT = "ListOfSubreddits"
 USER_AGENT = "ListOfSubreddits helper (by /u/Watchful1)"
-LOOP_TIME = 15 * 60
+LOOP_TIME = 60 * 60
 DATABASE_NAME = "database.db"
 LIMIT = 50000
 
@@ -198,6 +198,10 @@ while True:
 			addSubs.add(sub)
 
 	bldr = []
+	bldr.append("Updated: ")
+	bldr.append(datetime.utcnow().strftime("%m/%d/%y %I:%M %p UTC"))
+	bldr.append("\n\n")
+
 	bldr.append("Add subreddits: ")
 	bldr.append(str(len(addSubs)))
 	bldr.append("  \n\n")
