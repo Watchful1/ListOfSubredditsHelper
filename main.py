@@ -138,7 +138,10 @@ def getSubredditSubscribers(subredditName):
 	subreddit = r.subreddit(subredditName)
 	try:
 		subscribers = subreddit.subscribers
-		return subscribers
+		if subscribers is None:
+			return 0
+		else:
+			return subscribers
 	except Exception as err:
 		return -1
 
