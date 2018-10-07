@@ -240,7 +240,7 @@ while True:
 		bldr.append("Every subreddit (")
 		bldr.append(str(len(largerSubs)))
 		bldr.append(") with 50k+ subscribers. Note that some may be NSFW.\n\n")
-		for sub in sorted(removeSubs, key=allSubs.get)[::-1]:
+		for sub in sorted(largerSubs)[::-1]:
 			bldr.append("* /r/")
 			bldr.append(sub)
 			bldr.append("\n")
