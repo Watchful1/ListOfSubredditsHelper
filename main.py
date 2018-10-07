@@ -235,6 +235,21 @@ while True:
 		else:
 			addRemoveWiki = r.subreddit(SUBREDDIT).wiki['addremovesubreddits']
 			addRemoveWiki.edit(''.join(bldr))
+
+		bldr = []
+		bldr.append("Every subreddit (")
+		bldr.append(str(len(largerSubs)))
+		bldr.append(") with 50k+ subscribers. Note that some may be NSFW.\n\n")
+		for sub in sorted(removeSubs, key=allSubs.get)[::-1]:
+			bldr.append("* /r/")
+			bldr.append(sub)
+			bldr.append("\n")
+
+		if debug:
+			log.debug(''.join(bldr))
+		else:
+			botAlphabetizedWiki = r.subreddit(SUBREDDIT).wiki['bot_alphabetized']
+			botAlphabetizedWiki.edit(''.join(bldr))
 	except Exception as err:
 		log.warning("Error in loop")
 		log.warning(traceback.format_exc())
