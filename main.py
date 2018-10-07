@@ -87,6 +87,7 @@ def getAllSubreddits():
 	result = c.execute('''
 		SELECT Subreddit, CheckedDate, Subscribers
 		FROM subreddits
+		ORDER BY Subreddit desc
 	''')
 
 	out = []
