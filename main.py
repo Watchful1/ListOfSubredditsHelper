@@ -94,7 +94,7 @@ def getAllSubreddits():
 	for subreddit in result.fetchall():
 		out.append({'subreddit': subreddit[0],
 		            'checkedDate': datetime.strptime(subreddit[1], "%Y-%m-%d %H:%M:%S"),
-		            'subscribers': subreddit[2] if subreddit[2] is not None else 0})
+		            'subscribers': subreddit[2] if subreddit[2] is not None else -1})
 
 	return out
 
@@ -140,7 +140,7 @@ def getSubredditSubscribers(subredditName):
 	try:
 		subscribers = subreddit.subscribers
 		if subscribers is None:
-			return 0
+			return -1
 		else:
 			return subscribers
 	except Exception as err:
