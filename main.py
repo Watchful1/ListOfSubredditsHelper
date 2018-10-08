@@ -237,6 +237,9 @@ while True:
 			addRemoveWiki.edit(''.join(bldr))
 
 		bldr = []
+		bldr.append("Updated: ")
+		bldr.append(datetime.utcnow().strftime("%m/%d/%y %I:%M %p UTC"))
+		bldr.append("\n\n")
 		bldr.append("Every subreddit (")
 		bldr.append(str(len(largerSubs)))
 		bldr.append(") with 50k+ subscribers. Note that some may be NSFW.\n\n")
