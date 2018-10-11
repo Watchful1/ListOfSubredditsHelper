@@ -249,7 +249,7 @@ while True:
 		bldr.append(datetime.utcnow().strftime("%m/%d/%y %I:%M %p UTC"))
 		bldr.append("\n\n")
 		bldr.append("Every subreddit (")
-		bldr.append(str(len(largerSubs)))
+		bldr.append(str(len(subsInList)))
 		bldr.append(") with 50k+ subscribers. Note that some may be NSFW.\n\n")
 		for sub in sorted(subsInList):
 			bldr.append("* /r/")
