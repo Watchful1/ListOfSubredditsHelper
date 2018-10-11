@@ -20,6 +20,11 @@ USER_AGENT = "ListOfSubreddits helper (by /u/Watchful1)"
 LOOP_TIME = 60 * 60
 DATABASE_NAME = "database.db"
 LIMIT = 50000
+MAIN_PAGES = [
+	'listofsubreddits',
+	'games50k',
+	'nsfw',
+]
 
 ### Logging setup ###
 LOG_LEVEL = logging.DEBUG
@@ -181,8 +186,11 @@ while True:
 				addSubreddit(subredditName, subscribers)
 				addSubToSets(subredditName, subscribers, allSubs, largerSubs, smallerSubs)
 
-		listWiki = r.subreddit(SUBREDDIT).wiki['alphabetized']
-		subsInList = re.findall('(?:/r/)([\w-]+)', listWiki.content_md)
+		subsInList = []
+		for page in MAIN_PAGES:
+			listWiki = r.subreddit(SUBREDDIT).wiki[page]
+			subsInList.extend(re.findall('(?:^\**/r/)([\w-]+)', listWiki.content_md, re.MULTILINE))
+
 		removeSubs = set()
 		listSubs = set()
 		for sub in subsInList:
@@ -243,7 +251,7 @@ while True:
 		bldr.append("Every subreddit (")
 		bldr.append(str(len(largerSubs)))
 		bldr.append(") with 50k+ subscribers. Note that some may be NSFW.\n\n")
-		for sub in sorted(largerSubs):
+		for sub in sorted(subsInList):
 			bldr.append("* /r/")
 			bldr.append(sub)
 			bldr.append("\n")
