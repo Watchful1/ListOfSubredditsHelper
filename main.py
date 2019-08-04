@@ -20,7 +20,7 @@ LOOP_TIME = 60 * 60
 DATABASE_NAME = "database.db"
 LIMIT = 50000
 
-log = discord_logging.init_logging()
+log = discord_logging.init_logging(debug=True)
 
 
 dbConn = sqlite3.connect(DATABASE_NAME)
