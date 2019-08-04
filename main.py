@@ -1,8 +1,6 @@
 #!/usr/bin/python3
 
 import praw
-import os
-import logging.handlers
 import sys
 import configparser
 import signal
@@ -12,6 +10,7 @@ import sqlite3
 import re
 from datetime import datetime
 from datetime import timedelta
+import discord_logging
 
 ### Config ###
 LOG_FOLDER_NAME = "logs"
@@ -20,31 +19,8 @@ USER_AGENT = "ListOfSubreddits helper (by /u/Watchful1)"
 LOOP_TIME = 60 * 60
 DATABASE_NAME = "database.db"
 LIMIT = 50000
-MAIN_PAGES = [
-	'listofsubreddits',
-	'games50k',
-	'nsfw',
-]
 
-### Logging setup ###
-LOG_LEVEL = logging.DEBUG
-if not os.path.exists(LOG_FOLDER_NAME):
-	os.makedirs(LOG_FOLDER_NAME)
-LOG_FILENAME = LOG_FOLDER_NAME+"/"+"bot.log"
-LOG_FILE_BACKUPCOUNT = 5
-LOG_FILE_MAXSIZE = 1024 * 256 * 16
-
-log = logging.getLogger("bot")
-log.setLevel(LOG_LEVEL)
-log_formatter = logging.Formatter('%(asctime)s - %(levelname)s: %(message)s')
-log_stderrHandler = logging.StreamHandler()
-log_stderrHandler.setFormatter(log_formatter)
-log.addHandler(log_stderrHandler)
-if LOG_FILENAME is not None:
-	log_fileHandler = logging.handlers.RotatingFileHandler(LOG_FILENAME, maxBytes=LOG_FILE_MAXSIZE, backupCount=LOG_FILE_BACKUPCOUNT)
-	log_formatter_file = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-	log_fileHandler.setFormatter(log_formatter_file)
-	log.addHandler(log_fileHandler)
+log = discord_logging.init_logging()
 
 
 dbConn = sqlite3.connect(DATABASE_NAME)
@@ -97,9 +73,10 @@ def getAllSubreddits():
 
 	out = []
 	for subreddit in result.fetchall():
-		out.append({'subreddit': subreddit[0],
-		            'checkedDate': datetime.strptime(subreddit[1], "%Y-%m-%d %H:%M:%S"),
-		            'subscribers': subreddit[2] if subreddit[2] is not None else -1})
+		out.append(
+			{'subreddit': subreddit[0],
+			'checkedDate': datetime.strptime(subreddit[1], "%Y-%m-%d %H:%M:%S"),
+			'subscribers': subreddit[2] if subreddit[2] is not None else -1})
 
 	return out
 
@@ -187,9 +164,12 @@ while True:
 				addSubToSets(subredditName, subscribers, allSubs, largerSubs, smallerSubs)
 
 		subsInList = []
-		for page in MAIN_PAGES:
-			listWiki = r.subreddit(SUBREDDIT).wiki[page]
-			subsInList.extend(re.findall('(?:^\**/r/)([\w-]+)', listWiki.content_md, re.MULTILINE))
+		for page in r.subreddit(SUBREDDIT).wiki['meta_pages'].content_md.splitlines():
+			try:
+				listWiki = r.subreddit(SUBREDDIT).wiki[page.strip()]
+				subsInList.extend(re.findall('(?:^\**/r/)([\w-]+)', listWiki.content_md, re.MULTILINE))
+			except Exception:
+				log.info(f"Error parsing page: {page.strip()}")
 
 		removeSubs = set()
 		listSubs = set()
